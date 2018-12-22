@@ -1,30 +1,31 @@
-import React from "react"
+import React, { Component } from 'react';
 import { render } from "react-dom"
-import { Observable } from "rxjs"
-import rxjsConfig from "recompose/rxjsObservableConfig"
+import { Observable, interval  } from "rxjs"
+import { ajax } from "rxjs"
+import config from "recompose/rxjsObservableConfig"
 import {
   setObservableConfig,
   componentFromStream
 } from "recompose"
 
-setObservableConfig(rxjsConfig)
+setObservableConfig(config);
 
 const personById = id =>
   `https://swapi.co/api/people/${id}`
 
 const Card = props => (
   <div>
-    <h3>{props.name}</h3>
-    <h4>{props.homeworld}</h4>
+    <span>{props.name}</span>
+    <span>, {props.homeworld}</span>
   </div>
 )
 
 const loadById = id =>
-  Observable.ajax(personById(id))
+  Observable.ajax(personById(id))    
     .pluck("response")
-    .switchMap(
+     .switchMap(
       response =>
-        Observable.ajax(response.homeworld)
+        Observable.ajax(response.homeworld)          
           .pluck("response")
           .startWith({ name: "" }),
       (person, homeworld) => ({
@@ -32,10 +33,12 @@ const loadById = id =>
         homeworld: homeworld.name
       })
     )
+  
 
 const CardStream = componentFromStream(props$ =>
-  props$
-    .switchMap(props => loadById(props.id))
+  props$          
+    .switchMap(props => loadById(props.id))  
+    .do(console.log(props$))    
     .map(Card)
 )
 
@@ -48,5 +51,5 @@ const App = () => (
     <CardStream id={24} />
   </div>
 )
-
-render(<App />, document.getElementById("root"))
+const App03 = App;
+export default App03;
